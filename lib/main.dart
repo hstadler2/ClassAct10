@@ -6,9 +6,9 @@ InClassAct10 - SignUpPage
 */
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-
+import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:intl/intl.dart';
 
 void main() => runApp(const MyApp());
 
@@ -31,201 +31,188 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// Create a Form widget.
+// A simple ConfirmationPage that shows a welcome message with the user's first name.
+class ConfirmationPage extends StatelessWidget {
+  final String firstName;
+
+  const ConfirmationPage({super.key, required this.firstName});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Confirmation'),
+      ),
+      body: Center(
+        child: Text(
+          'Signup successful!\nWelcome, $firstName!',
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 20),
+        ),
+      ),
+    );
+  }
+}
+
+// Create a FormBuilder widget.
 class MyCustomForm extends StatefulWidget {
   const MyCustomForm({super.key});
 
   @override
-  MyCustomFormState createState() {
-    return MyCustomFormState();
-  }
+  MyCustomFormState createState() => MyCustomFormState();
 }
 
-// Create a corresponding State class.
+// The form state using flutter_form_builder.
 class MyCustomFormState extends State<MyCustomForm> {
-  // Keep the original _formKey
-  final _formKey = GlobalKey<FormState>();
-
-  // Controllers for text fields
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _contactNoController = TextEditingController();
-  final TextEditingController _dobController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
-
-  // Example date variable for the date picker
-  DateTime? _selectedDate;
-
-  // Basic email validation
-  String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter your email address';
-    }
-    // Simple regex to check format: something@something.domain
-    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
-    if (!emailRegex.hasMatch(value)) {
-      return 'Please enter a valid email address';
-    }
-    return null;
-  }
-
-  // Password validation: min 8 chars, at least one digit, at least one uppercase letter
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter a password';
-    } else if (value.length < 8) {
-      return 'Password must be at least 8 characters long';
-    } else if (!RegExp(r'\d').hasMatch(value)) {
-      return 'Password must contain at least one number';
-    } else if (!RegExp(r'[A-Z]').hasMatch(value)) {
-      return 'Password must contain at least one uppercase letter';
-    }
-    return null;
-  }
+  final _formKey = GlobalKey<FormBuilderState>();
 
   @override
   Widget build(BuildContext context) {
-    // Build a Form widget using the _formKey created above.
-    return Form(
+    return FormBuilder(
       key: _formKey,
+      // Using a SingleChildScrollView to ensure the form is scrollable.
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Row for first name and last name
+            // Row for first name and last name fields.
             Row(
               children: [
                 Expanded(
-                  child: TextFormField(
-                    controller: _firstNameController,
+                  child: FormBuilderTextField(
+                    name: 'first_name',
                     decoration: const InputDecoration(
                       labelText: 'First Name',
                       hintText: 'Enter your first name',
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your first name';
-                      }
-                      return null;
-                    },
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(),
+                    ]),
                   ),
                 ),
                 const SizedBox(width: 16.0),
                 Expanded(
-                  child: TextFormField(
-                    controller: _lastNameController,
+                  child: FormBuilderTextField(
+                    name: 'last_name',
                     decoration: const InputDecoration(
                       labelText: 'Last Name',
                       hintText: 'Enter your last name',
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your last name';
-                      }
-                      return null;
-                    },
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(),
+                    ]),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16.0),
-
-            // Row for email and contact no.
+            // Row for email and contact number.
             Row(
               children: [
                 Expanded(
-                  child: TextFormField(
-                    controller: _emailController,
+                  child: FormBuilderTextField(
+                    name: 'email',
                     decoration: const InputDecoration(
                       labelText: 'Email Address',
                       hintText: 'Enter your email',
                     ),
-                    validator: _validateEmail,
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(),
+                      FormBuilderValidators.email(),
+                    ]),
                   ),
                 ),
                 const SizedBox(width: 16.0),
                 Expanded(
-                  child: TextFormField(
-                    controller: _contactNoController,
-                    keyboardType: TextInputType.phone,
+                  child: FormBuilderTextField(
+                    name: 'contact_no',
                     decoration: const InputDecoration(
                       labelText: 'Contact No.',
                       hintText: 'Enter your phone number',
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your contact number';
-                      }
-                      return null;
-                    },
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(),
+                    ]),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16.0),
-
-            // Row for DOB
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _dobController,
-                    readOnly: true, // so the user can only pick via calendar
-                    decoration: InputDecoration(
-                      labelText: 'Date of Birth',
-                      hintText: 'MM/DD/YYYY',
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.calendar_today),
-                        onPressed: _pickDate,
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please select date of birth';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-              ],
+            // Date of Birth field using a built-in date picker.
+            FormBuilderDateTimePicker(
+              name: 'dob',
+              inputType: InputType.date,
+              format: DateFormat('MM/dd/yyyy'),
+              decoration: const InputDecoration(
+                labelText: 'Date of Birth',
+                hintText: 'MM/DD/YYYY',
+              ),
+              validator: FormBuilderValidators.compose([
+                FormBuilderValidators.required(),
+              ]),
             ),
             const SizedBox(height: 16.0),
-
-            // Password field
-            TextFormField(
-              controller: _passwordController,
+            // Password field with custom validation.
+            FormBuilderTextField(
+              name: 'password',
               decoration: const InputDecoration(
                 labelText: 'Password',
                 hintText: 'Enter a strong password',
               ),
               obscureText: true,
-              validator: _validatePassword,
+              validator: FormBuilderValidators.compose([
+                FormBuilderValidators.required(),
+                FormBuilderValidators.minLength(8),
+                (val) {
+                  if (val == null || !RegExp(r'\d').hasMatch(val)) {
+                    return 'Password must contain at least one number';
+                  }
+                  return null;
+                },
+                (val) {
+                  if (val == null || !RegExp(r'[A-Z]').hasMatch(val)) {
+                    return 'Password must contain at least one uppercase letter';
+                  }
+                  return null;
+                },
+              ]),
             ),
             const SizedBox(height: 16.0),
-
-            // Address field (full width)
-            TextFormField(
-              controller: _addressController,
+            // Address field.
+            FormBuilderTextField(
+              name: 'address',
               decoration: const InputDecoration(
                 labelText: 'Address',
                 hintText: 'Enter your address',
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your address';
-                }
-                return null;
-              },
+              validator: FormBuilderValidators.compose([
+                FormBuilderValidators.required(),
+              ]),
             ),
             const SizedBox(height: 24.0),
-
-            // Button present, but no "submission handling" here
+            // Submission button that handles validation and navigation.
             ElevatedButton(
               onPressed: () {
-                // Submission handling / navigation intentionally left out
-                // for now, per your instruction.
+                // Save and validate the form.
+                if (_formKey.currentState?.saveAndValidate() ?? false) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Form is valid!')),
+                  );
+                  // Retrieve the first name from the form fields.
+                  final firstName = _formKey.currentState!.value['first_name'];
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          ConfirmationPage(firstName: firstName),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text('Please fix errors in the form.')),
+                  );
+                }
               },
               child: const Text('Submit'),
             ),
@@ -233,25 +220,5 @@ class MyCustomFormState extends State<MyCustomForm> {
         ),
       ),
     );
-  }
-
-  // Method to open the date picker and set the date
-  Future<void> _pickDate() async {
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime(2100),
-    );
-    if (pickedDate != null) {
-      setState(() {
-        _selectedDate = pickedDate;
-        // If you have imported 'package:intl/intl.dart', you can format:
-        // _dobController.text = DateFormat('MM/dd/yyyy').format(pickedDate);
-        // Otherwise, you can just do a raw toString() or your own custom format:
-        _dobController.text =
-            '${pickedDate.month}/${pickedDate.day}/${pickedDate.year}';
-      });
-    }
   }
 }
